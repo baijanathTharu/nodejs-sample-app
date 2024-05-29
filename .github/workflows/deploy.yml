@@ -33,7 +33,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "$EC2_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+          echo "$EC2_HOST" > /tmp/host
+          ssh-keyscan -H -t rsa $(cat /tmp/host) >> ~/.ssh/known_hosts
+          cat ~/.ssh/known_hosts
           rsync -avz -e "ssh -i ~/.ssh/id_rsa" --exclude node_modules --exclude .git ./ $EC2_USER@$EC2_HOST:/home/$EC2_USER/app
 
       - name: Restart Node.js app
