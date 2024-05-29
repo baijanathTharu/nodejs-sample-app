@@ -23,6 +23,7 @@ jobs:
 
       # - name: Build project
       #   run: npm run build
+      
       - name: Debug Environment Variables
         run: |
           echo "EC2_HOST: ${{ secrets.EC2_HOST }}"
