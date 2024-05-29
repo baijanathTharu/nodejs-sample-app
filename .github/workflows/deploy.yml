@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+runs:
+  using: "node20"
+  main: "main.js"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
