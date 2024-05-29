@@ -23,12 +23,18 @@ jobs:
 
       # - name: Build project
       #   run: npm run build
-      
+
       - name: Debug Environment Variables
         run: |
           echo "EC2_HOST: ${{ secrets.EC2_HOST }}"
           echo "EC2_USER: ${{ secrets.EC2_USER }}"
           echo "EC2_KEY: ${{ secrets.EC2_KEY }}"
+
+      - name: Setup SSH for EC2
+        uses: omarhosny206/setup-ssh-for-ec2@v1.0.0
+        with:
+          EC2_SSH_PRIVATE_KEY: $EC2_KEY
+          EC2_URL: $EC2_HOST
 
       - name: Copy files via SSH
         env:
@@ -36,13 +42,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_KEY: ${{ secrets.EC2_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$EC2_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "$EC2_HOST" > /tmp/host
-          ssh-keyscan -H -t rsa $(cat /tmp/host) >> ~/.ssh/known_hosts
-          cat ~/.ssh/known_hosts
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" --exclude node_modules --exclude .git ./ $EC2_USER@$EC2_HOST:/home/$EC2_USER/app
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --exclude node_modules --exclude .git ./ $EC2_USER@$EC2_HOST:/home/$EC2_USER/app
 
       - name: Restart Node.js app
         env:
@@ -50,7 +50,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_KEY: ${{ secrets.EC2_KEY }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             cd /home/$EC2_USER/app
             npm install
             pm2 restart all || pm2 start server.js --name "node-app"
