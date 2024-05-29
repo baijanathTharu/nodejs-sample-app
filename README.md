@@ -1,1 +1,3 @@
 # nodejs sample app
+
+debug
